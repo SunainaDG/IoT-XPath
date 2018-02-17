@@ -1,0 +1,44 @@
+﻿@using GlobalResources
+<div class="dashboard_telemetry_history_summary">
+    <div id="maxDeviceSpeedContainer" class="dashboard_telemetry_history_summary__dashboard_telemetry_history_gauge dashboard_telemetry_history_gauge--leftGauge">
+        <h5 class="telemetry_summary_gauge_control__gauge_header" id="maxDeviceSpeedLabel">@Strings.MaxOfDevicesSpeed</h5>
+        <div id="maxDeviceSpeed" class="dashboard_telemetry_history_gauge__telemetry_summary_gauge_control"></div>
+    </div><div id="minDeviceSpeedContainer" class="dashboard_telemetry_history_summary__dashboard_telemetry_history_gauge dashboard_telemetry_history_gauge--centerGauge">
+              <h5 class="telemetry_summary_gauge_control__gauge_header" id="maxDeviceSpeedLabel">@Strings.MinOfDevicesSpeed</h5>
+        <div id="minDeviceSpeed" class="dashboard_telemetry_history_gauge__telemetry_summary_gauge_control"></div>
+    </div>
+    <div id="avgDeviceSpeedContainer" class="dashboard_telemetry_history_summary__dashboard_telemetry_history_gauge dashboard_telemetry_history_gauge--rightGauge">
+        <h5 class="telemetry_summary_gauge_control__gauge_header" id="avgDeviceSpeedLabel">@Strings.AverageOfDeviceSpeed</h5>
+        <div id="averageDeviceSpeed" class="dashboard_telemetry_history_gauge__telemetry_summary_gauge_control"></div>
+    </div>
+</div>
+<script src="~/Scripts/Views/Dashboard/TelemetryHistorySummary.js?ver=@Constants.JSVersion"></script>
+<script>
+
+    (function () {
+        'use strict';
+        
+        var telemetryHistorySummarySettings = {
+            averageDeviceSpeedContainer: $('#avgDeviceSpeedContainer'),
+            averageDeviceSpeedControl: $('#averageDeviceSpeed'),
+            averageDeviceSpeedLabel: $('#avgDeviceSpeedLabel'),
+            gaugeMaxValue: 100,
+            gaugeMinValue: 0,
+            maxDeviceSpeedContainer: $('#maxDeviceSpeedContainer'),
+            maxDeviceSpeedControl: $('#maxDeviceSpeed'),
+            maxDeviceSpeedLabel: $('#maxDeviceSpeedLabel'),
+            minDeviceSpeedContainer: $('#minDeviceSpeedContainer'),
+            minDeviceSpeedControl: $('#minDeviceSpeed'),
+            minDeviceSpeedLabel: $('#maxDeviceSpeedLabel')
+        };
+
+        IoTApp.Dashboard.TelemetryHistorySummary.init(telemetryHistorySummarySettings);
+        IoTApp.Dashboard.TelemetryHistorySummary.resizeTelemetryHistorySummaryGuages();
+
+        $(window).resize(
+            function () {
+                IoTApp.Dashboard.TelemetryHistorySummary.resizeTelemetryHistorySummaryGuages();
+            });
+
+    })();
+</script>

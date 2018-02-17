@@ -1,0 +1,31 @@
+﻿@using GlobalResources
+<script src="~/Scripts/jquery-datatables-api-extensions.js"></script>
+<div class="dashboard_alert_history grid_container height_fixed">
+    @*Datatables plugin for jQuery. www.datatables.net*@
+    <table id="alertHistoryTable" class="alert_history_table order-column">
+        <thead>
+            <tr>
+                <th>@Strings.LocalTime</th>
+                <th>@Strings.DeviceIdHeader</th>                
+                <th>@Strings.VerticalJerk</th>
+                <th>@Strings.LateralJerk</th>
+                <th>@Strings.RuleOutput</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+<script src="~/Scripts/Views/Dashboard/AlertHistory.js?ver=@Constants.JSVersion"></script>
+<script type="text/javascript">
+    (function () {
+        'use strict';
+
+        var alertHistoryTableSettings = {
+            dataTable: $('#alertHistoryTable'),
+            getDataUri: '/api/v1/telemetry/alertHistory',
+            refreshMilliseconds: 5000
+        };
+
+        IoTApp.AlertHistoryTable.init(alertHistoryTableSettings);
+    })();
+</script>

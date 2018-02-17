@@ -1,0 +1,82 @@
+﻿@using GlobalResources
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Infrastructure.Models
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Helpers
+@model Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Models.LocationPropertiesModel
+@{
+    ViewBag.Title = "Locations";
+}
+
+<noscript>
+    <div class="error_noscript">
+        <h1 class="error_noscript__header">@Strings.NoscriptHeader</h1>
+        <p>@Strings.NoscriptP1</p>
+        <p>@Strings.NoscriptP2</p>
+    </div>
+</noscript>
+
+<div class="content_outer content_outer--background_color content_grid">
+    <div class="content_inner content_inner--inherit_max_width_no_margin">
+        <div class="grid_container height_fixed">
+
+            @*Datatables plugin for jQuery. www.datatables.net*@
+            <table id="locationsTable" class="order-column">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>@Strings.StatusHeader</th>
+                        <th>@Strings.LatitudeHeader</th>
+                        <th>@Strings.LongitudeHeader</th>
+                        <th>@Strings.NoOfJerkedDevicesHeader</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="details_grid_closed height_fixed button_details_grid">
+            <h2 class="details_grid_closed__grid_subhead">@Strings.LocationPropertiesPaneLabel</h2>
+        </div>
+
+        <div class="details_grid height_fixed">
+            <h2 class="details_grid__grid_subhead button_details_grid">@Strings.LocationPropertiesPaneLabel</h2>
+            <div id="details_grid_container">
+                <div class="details_grid__no_selection">
+                    @Strings.NoLocationSelectedLabel
+                </div>
+            </div>
+            <div id="loadingElement" class="loader_container loader_container_details">
+                <div class="loader_container__loader"></div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    "use strict";
+
+    var resources = {
+        retry: '@Html.JavaScriptString(Strings.Retry)',
+        serviceUnavailable: '@Html.JavaScriptString(Strings.ServiceUnavailable)',
+        unableToRetrieveLocationsFromService: '@Html.JavaScriptString(Strings.UnableToRetrieveLocationsFromService)',
+        failedToDelete: '@Html.JavaScriptString(Strings.UnableToDeleteSelectedLocations)',
+        critical: '@Html.JavaScriptString(Strings.Critical)',
+        caution: '@Html.JavaScriptString(Strings.Caution)',
+        green: '@Html.JavaScriptString(Strings.GoodRoad)',
+        failedToRetrieveLocations: '@Html.JavaScriptString(Strings.FailedToRetrieveLocations)',
+        noLocationSelected: '@Html.JavaScriptString(Strings.NoLocationSelectedLabel)',
+        failedToUpdateActionId: '@Html.JavaScriptString(Strings.FailedToUpdateActionId)',
+        locationsList: '@Html.JavaScriptString(Strings.Locations)',
+        nextPage: '@Html.JavaScriptString(Strings.Next)',
+        previousPage: '@Html.JavaScriptString(Strings.Previous)',
+        fromMap: '@Model.FromMap',
+        mapLat: '@Model.Latitude',
+        mapLong: '@Model.Longitude',
+        failedToDeleteLocationJerks: '@Html.JavaScriptString(Strings.LocationJerkDeletionError)',
+        successfullyDeletedLocationJerks: '@Html.JavaScriptString(Strings.LocationJerksCleared)'
+    };
+</script>
+
+<script src="~/Scripts/jquery-datatables-api-extensions.js"></script>
+<script src="~/Scripts/Views/Locations/LocationsIndex.js?ver=@Constants.JSVersion"></script>
+<script src="~/Scripts/Views/Locations/LocationProperties.js?ver=@Constants.JSVersion"></script>

@@ -1,0 +1,185 @@
+﻿/* ##### Reset styles ##### */
+html {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+main {
+    display: block;
+    margin-left: 95px;
+    padding-top: 60px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    padding: 0;
+}
+
+ul, ol {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    margin: 0;
+    padding: 0;
+}
+
+div {
+    position: relative;
+}
+
+section {
+    clear: both;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    overflow: auto;
+}
+
+
+/* ##### Typography ##### */
+
+body {
+    font-family: 'Segoe UI', Verdana, Arial, sans-serif;
+    font-size: 16px;
+    color: @text-color;
+}
+
+h1, h2 {
+    font-weight: 500;
+}
+
+h2 {
+    font-size: 1.4em;
+    margin-bottom: .4em;
+}
+
+h3, h4 {
+    color: @text-mainhead-color;
+    font-size: 1.333em;
+    font-weight: normal;
+    margin-bottom: .4em;
+}
+
+a {
+    text-decoration: none;
+    color: @anchor-color;
+    cursor: pointer;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+
+body {
+    background-color: @body-background-color;
+}
+
+main {
+    background-color: @body-background-color;
+}
+
+.page {
+    min-width: 800px;
+}
+
+
+main.main_no_nav {
+    margin-left: 0;
+}
+
+.button_base {
+    display: block;
+    float: left;
+    color: @button-color;
+    background-color: @button-background-color;
+    border: 1px solid @button-border-color;
+    font-size: 16px;
+    min-width: 6.45em;
+    padding: 0 1em;
+    min-height: 32px;
+    cursor: pointer;
+    outline:0;
+}
+
+.button_base:disabled {
+    background-color: @button-disabled-background-color;
+    border-color: @button-disabled-border-color;
+    color: @text-secondary-color;
+}
+
+
+/* ##### Prefix functions ##### */
+
+.transform(@string) {
+    -webkit-transform: @string;
+    -moz-transform: @string;
+    -ms-transform: @string;
+    -o-transform: @string;
+    transform: @string;
+}
+
+.display-flex() {
+    display: -webkit-flex;
+    display: -moz-flex;
+    display: -ms-flex;
+    display: -o-flex;
+    display: flex;
+}
+
+.display-inline-flex() {
+    display: -webkit-inline-flex;
+    display: -moz-inline-flex;
+    display: -ms-inline-flex;
+    display: -o-inline-flex;
+    display: inline-flex;
+}
+
+.input-placeholder {
+    color: @form-textbox-disabled-color;
+    border-color: @form-textbox-disabled-border;
+    font-style: italic;
+}
+
+::-webkit-input-placeholder { /* WebKit browsers */
+    .input-placeholder;
+}
+
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+    .input-placeholder;
+}
+
+:-ms-input-placeholder { /* IE 10+ */
+    .input-placeholder;
+}
+
+/* Common style */
+
+.display_none {
+    display: none;
+}
+
+.cursor_pointer {
+    cursor: pointer;
+}
+
+.vertical_center {
+    vertical-align:middle;
+}
+
+.no_select {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none; 
+    user-select: none; 
+}

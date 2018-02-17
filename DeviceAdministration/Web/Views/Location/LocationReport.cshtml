@@ -1,0 +1,170 @@
+﻿@using System.Web.Mvc.Html
+@using GlobalResources
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Security
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Helpers
+@model Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Models.LocationPropertiesModel
+
+
+@{
+    ViewBag.Title = Strings.LocationReport;
+    Layout = "~/Views/Shared/_LayoutNoNavigation.cshtml";
+}
+
+<header class="header_main">
+    <button id="btnBack" class="header_main__button_back" type="button"></button>
+    <h3 class="header_main__subhead header_main__subhead--large">@Strings.LocationReport</h3>
+</header>
+<div class="report_content_outer">
+    <div class="report_content_outer_overlay">
+        <div class="report_content_inner_left">
+            <div id="content">
+                <fieldset class="location_report">
+                    <label class="location_report_header">@Strings.Address</label>
+                    <label class="location_report__text">45 Lowden Street, Katlabagan , Kolkata 700021</label>
+
+                    <label class="location_report_header">@Strings.State</label>
+                    <label class="location_report__text">West Bengal</label>
+
+                    <label class="location_report_header">@Strings.Country</label>
+                    <label class="location_report__text">India</label>
+
+                    <label class="location_report_header">@Strings.LocationRule</label>
+                    @{
+                        var ruleIdLabel = Model.RuleId;
+                        if (string.IsNullOrWhiteSpace(Model.RuleId))
+                        {
+                            ruleIdLabel = Strings.DefaultRuleApplied;
+                            if (PermsChecker.HasPermission(Permission.CreateRules))
+                            {
+                                <a id="btnViewRule">
+                                    <div class="location_report__labelbutton">@ruleIdLabel</div>
+                                </a>
+                            }
+                            else
+                            {
+                                <label class="location_report__text">@ruleIdLabel</label>
+                            }
+                        }
+                        else
+                        {
+                            <a id="btnViewRule">
+                                <div class="location_report__labelbutton">@ruleIdLabel</div>
+                            </a>
+                        }
+                    }                  
+
+                    <label class="location_report_header">@Strings.LocationStatus</label>
+                    <label class="location_report__text">@Model.Status</label>
+
+                    <label class="location_report_header">@String.Format(Strings.DevicesDropDownHeader,Model.NoOfDevices)</label>
+
+                    <table id="dropDownContainerTable" class="location_report_table_dropdown">
+                        <tbody>
+                            
+                        </tbody>
+                    </table>
+
+                    <a id="btnAddDevice">
+                        <span class="report_icon-add"></span>
+                        <div class="location_report__labelbutton">
+                            @Strings.AddDeviceToCompareLocationGraph
+                        </div>
+                    </a>
+
+                    <button  id="btnViewGraph" class="button_base report_view_compare_button update_rule_properties" type="submit">@Strings.ViewLocationGraph</button>
+                </fieldset>
+            </div>
+        </div>
+        <div class="report_content_inner_right">
+            <div id="topPane" style="margin-bottom:10px" class="location_report_graph_pane">
+                <div class="device_report_details">
+                    <div id="topPaneDetails" style="width:100%">
+                        <fieldset>
+                            <label class="device_report_subhead">@Strings.DeviceIdHeader</label>
+                            <label class="device_report_text txt_deviceid"></label>
+
+                            <label class="device_report_subhead">@Strings.Speed</label>
+                            <label class="device_report_text txt_speed"></label>
+
+                            <label class="device_report_subhead">@Strings.HeadingTowards</label>
+                            <label class="device_report_text txt_heading"></label>
+
+                            @*<label class="device_report_subhead">@Strings.JerksToInclude</label>
+                            <table style="clear:both;">
+                                <tr class="device_report_jerk_choice">
+                                    <td><input type="checkbox" value="vertical" /></td>
+                                    <td>@Strings.Vertical</td>
+                                </tr>
+                                <tr class="device_report_jerk_choice">
+                                    <td><input type="checkbox" value="lateral" /></td>
+                                    <td>@Strings.Lateral</td>
+                                </tr>
+                                <tr class="device_report_jerk_choice">
+                                    <td><input type="checkbox" value="forward" /></td>
+                                    <td>@Strings.Forward</td>
+                                </tr>
+                            </table>*@
+                        </fieldset>
+                    </div>                    
+                </div>
+                <div class="device_report_graph_pane">
+                    
+                </div>
+            </div>
+            <div id="bottomPane" class="location_report_graph_pane">
+                <div class="device_report_details">
+                    <div id="bottomPaneDetails" style="width:100%">
+                        <fieldset>
+                            <label class="device_report_subhead">@Strings.DeviceIdHeader</label>
+                            <label class="device_report_text txt_deviceid"></label>
+
+                            <label class="device_report_subhead">@Strings.Speed</label>
+                            <label class="device_report_text txt_speed"></label>
+
+                            <label class="device_report_subhead">@Strings.HeadingTowards</label>
+                            <label class="device_report_text txt_heading"></label>
+                        </fieldset>
+                    </div>                    
+                </div>
+                <div class="device_report_graph_pane">
+                    
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    "use strict";
+
+    var deviceArray = new Array();
+
+    @foreach (var obj in Model.JerkedDeviceSelectList)
+    {
+        @:deviceArray.push("@obj.Value");
+    }
+
+    var resources = {
+        @*//redirectUrl: '@Url.Action("Index", "Location")',*@
+        redirectUrl: '@Url.Action("Index", "Location",new { @latitude = Model.Latitude, @longitude = Model.Longitude})',
+        locationRuleUrl: '@Url.Action("CreateOrUpdate", "LocationRules",new { @lat = Model.RegionLatitude, @lng = Model.RegionLongitude})',
+        getJerkGraphUrl: '/api/v1/locations/jerkgraph/{deviceId}/{latitude}/{longitude}/',
+        deviceArray: deviceArray,
+        btnClearText: '@Html.JavaScriptString(Strings.Clear)',
+        latitude: '@Model.Latitude',
+        longitude: '@Model.Longitude',
+        failedToGetGraphData: '@Html.JavaScriptString(Strings.FailedToGetJerkGraph)',
+        noData: '@Html.JavaScriptString(Strings.NoData)'
+    }
+</script>
+<script type="text/javascript" src="~/Scripts/Views/Locations/LocationReport.js?ver=@Constants.JSVersion"></script>
+<script type="text/javascript">
+    $(document).ready(function () {        
+        IoTApp.LocationReport.init();
+
+        $(window).resize(
+            function () {
+                IoTApp.LocationReport.resizeGraphPane();
+            });
+    });
+</script>

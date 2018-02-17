@@ -1,0 +1,356 @@
+﻿@using GlobalResources
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Infrastructure.Models
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Helpers
+@{
+    ViewBag.Title = "Index";
+}
+
+<noscript>
+    <div class="error_noscript">
+        <h1 class="error_noscript__header">@Strings.NoscriptHeader</h1>
+        <p>@Strings.NoscriptP1</p>
+        <p>@Strings.NoscriptP2</p>
+    </div>
+</noscript>
+
+
+<div class="content_outer content_outer--background_color content_grid">
+    <div class="content_inner content_inner--inherit_max_width_no_margin">
+
+        <div class="grid_container height_fixed">
+
+            @*Datatables plugin for jQuery. www.datatables.net*@
+            <table id="deviceTable" class="order-column">
+
+                <thead>
+                    <tr>
+                    </tr>
+                </thead>
+
+                <tbody></tbody>
+
+            </table>
+            <div class="retry_message_container">
+            </div>
+            <script type="text/html" id="tableHeaderTemplate">
+                <div class="device_list_toolbar_title">
+                    <span class="device_list_toolbar_filtername" data-bind="text: name, click: startEditFilterName"></span>
+                    <input class="device_list_toolbar_filtername_input" data-bind="textInput: name, event: {keypress: filterNameBoxKeypress, blur: stopEditFilterName}" />
+                    <span class="device_list_toolbar_number" data-bind="visible: isChanged()">*</span>
+                    (<span class="device_list_toolbar_number" data-bind="text: filteredInfo"></span>)
+                </div>
+                <div class="device_list_toolbar_buttons">
+                    <img id="btnOpen" src="/Content/img/open_query.svg" title="@Strings.OpenSavedFilter" class="device_list_toolbar_button" data-bind="openFilterPopover: { template: '#openfilterContent', filterNameList: filterNameList }"/>
+                    <!--ko if: canEdit() -->
+                    <img src="/Content/img/edit_filter.svg" title="@Strings.EditFilter" class="device_list_toolbar_button" data-bind="click: showPanel" />
+                    <!-- /ko -->
+                    <!--ko if: canSave() && isChanged() -->
+                    <img src="/Content/img/save.svg" title="@Strings.SaveFilter" class="device_list_toolbar_button" data-bind="click: saveFilter.bind($data, null, true)" />
+                    <!-- /ko -->
+                    <!--ko if: canSaveAs() -->
+                    <img src="/Content/img/saveas.svg" title="@Strings.SaveAsFilter" class="device_list_toolbar_button" data-bind="click: openSaveAsDialog" />
+                    <!-- /ko -->
+                    <!--ko if: canDelete() -->
+                    <img src="/Content/img/delete.svg" title="@Strings.DeleteFilter" class="device_list_toolbar_button" data-bind="click: deleteFilter" />
+                    <!-- /ko -->
+                    <img src="/Content/img/refresh.svg" title="@Strings.Refresh" class="device_list_toolbar_button" onclick="IoTApp.DeviceIndex.reloadGrid()" />
+                </div>
+                <div id="dataLoading" class="loader_container_small pull-left">
+                    <div class="loader_container_small__loader"></div>
+                </div>
+                <div class="device_list_clauses">
+                    <!--ko if: !isAdvanced() -->
+                    <div data-bind="foreach: checkedClauses">
+                        <div class="device_list_clause no_select" data-bind="attr: { title: displayName }">
+                            <span data-bind="text: shortDisplayName"></span>
+                            <img src="/Content/img/column_delete.svg" data-bind="click: $parent.unCheckClause" />
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                    <!--ko if: isAdvanced() && advancedClause() -->
+                    <div class="device_list_clause" data-bind="attr: { title: advancedClause }">
+                        <span data-bind="text: advancedClause"></span>
+                    </div>
+                    <a href="#" class="device_list_clause_clear" data-bind="click: clearAdvancedClause">@Strings.ClearAll</a>
+                    <!-- /ko -->
+                </div>
+            </script>
+            <div id="openfilterContent" class="display_none">
+                <div class="filter_panel_lookup_title">@Strings.OpenSavedFilter</div>
+                <input class="filter_panel_lookup_box" id="lookupFilterBox" placeholder="@Strings.SavedFilters" data-bind="event: { keypress: lookupBoxKeypress}" />
+                <div class="filter_panel_filters" data-bind="foreach: filters">
+                    <a href="#" class="filter_panel_filter_link" data-bind="text: name, click: $parent.loadFilter.bind($data, id, true)"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="details_grid_closed height_fixed button_details_grid">
+            <h2 class="details_grid_closed__grid_subhead">@Strings.DeviceDetailsPaneLabel</h2>
+        </div>
+        <div class="details_grid height_fixed">
+
+            <h2 class="details_grid__grid_subhead button_details_grid">@Strings.DeviceDetailsPaneLabel</h2>
+
+            <div id="details_grid_container">
+                <div class="details_grid__no_selection">
+                    @Strings.NoDeviceSelectedLabel
+                </div>
+            </div>
+
+            <div id="loadingElement" class="loader_container loader_container_details">
+                <div class="loader_container__loader"></div>
+            </div>
+
+        </div>
+
+        <div class="device_list_multi_selection_grid height_fixed">
+            <h2 id="lblSelectedCount" class="device_list_multi_selection_grid_subhead"></h2>
+            <div class="header_grid header_grid_general">
+                <h3 class="grid_subheadhead_detail">@Strings.FilterLabel</h3>
+            </div>
+            <section class="details_grid_general">
+                <p class="grid_detail_value">
+                    <a id="lnkSaveAsFilter">@Strings.SaveAsFilter</a>
+                </p>
+            </section>
+
+            <div class="header_grid header_grid_general">
+                <h3 class="grid_subheadhead_detail">@Strings.Jobs</h3>
+            </div>
+            <section class="details_grid_general">
+            @if (ViewBag.HasManageJobsPerm)
+            {
+                <p class="grid_detail_value">
+                    <a class="multi_selection_job" data-job-type="ScheduleIconUpdate">@Strings.UpdateIcon</a>
+                </p>
+
+                <p class="grid_detail_value">
+                    <a class="multi_selection_job" data-job-type="ScheduleTwinUpdate">@Strings.UpdateTwin</a>
+                </p>
+
+                <p class="grid_detail_value">
+                    <a class="multi_selection_job" data-job-type="ScheduleDeviceMethod">@Strings.InvokeMethod</a>
+                </p>
+            }
+            else
+            {
+                <p class="grid_detail_value">@Strings.HaveNoPermissionError</p>
+            }
+            </section>
+            <div class="device_list_columns_button_container">
+                <button type="button" onclick="IoTApp.DeviceIndex.stopMultiSelectionIfNeeded()" class="button_base">
+                    @Strings.Cancel
+                </button>
+            </div>
+        </div>
+
+        <div class="filter_panel_dialog_container height_fixed">
+            <div class="filter_panel_dialog">
+                <span class="filter_panel_title">@Strings.SaveAs</span>
+                <div class="filter_panel_filtername_saveas">
+                    <label>@Strings.NameYourFilter</label>
+                    <div>
+                        <div id="defaultNameLoadingElement">
+                            <div></div>
+                        </div>
+                        <input class="filter_panel_filtername_saveas_input" data-bind="textInput: saveAsName">
+                    </div>
+                </div>
+
+                <div id="saveAdFilterButtons" class="filter_panel_buttons">
+                    <button type="button" class="button_base pull-right" data-bind="click: saveAsFilter, enable: saveAsName()">
+                        @Strings.Save
+                    </button>
+                    <button type="button" class="button_base filter_panel_button_gray pull-right" data-bind="click: closeSaveAsDialog">
+                        @Strings.Cancel
+                    </button>
+                </div>
+                <div id="saveAdFilterButtonsMultiSelection" class="filter_panel_buttons">
+                    <button type="button" class="button_base pull-right" data-bind="click: saveAsFilterForSelectedDevices.bind($data, true), enable: saveAsName()">
+                        @Strings.SaveAndOpen
+                    </button>
+                    <button type="button" class="button_base filter_panel_secondary_button pull-right" data-bind="click: saveAsFilterForSelectedDevices.bind($data, false), enable: saveAsName()">
+                        @Strings.Save
+                    </button>
+                    <button type="button" class="button_base filter_panel_button_gray pull-right" data-bind="click: closeSaveAsDialog">
+                        @Strings.Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter_panel_container height_fixed">
+            <div class="filter_panel">
+                <img src="~/Content/img/column_delete.svg" class="filter_panel_close_img" data-bind="click: cancelEdit" />
+                <span class="filter_panel_title">@Strings.FilterEditor</span>
+                <div class="filter_panel_content">
+                    <div>
+                        <div><label class="filter_panel_clause_edit_label">@Strings.FilterName</label></div>
+                        <input class="filter_panel_name_text" data-bind="textInput: name">
+                    </div>
+                    <div>
+                        <div class="filter_panel_type_select" data-toggle="dropdown">
+                            <span data-bind="visible: !isAdvanced()">@Strings.SearchTypeFilters</span>
+                            <span data-bind="visible: isAdvanced()">@Strings.SearchTypeAdvanced</span>
+                            <img src="~/Content/img/expanded.svg" class="filter_panel_type_select_img" />
+                        </div>
+                        <ul class="dropdown-menu">
+                            <li><a href="#" data-bind="click: function() { setAdvanced(false) }">@Strings.SearchTypeFilters</a></li>
+                            <li><a href="#" data-bind="click: function() { setAdvanced(true) }">@Strings.SearchTypeAdvanced</a></li>
+                        </ul>
+
+                        <label class="filter_panel_subtitle filter_panel_view_selected_clauses_only" data-bind="visible : !isAdvanced()"><input type="checkbox" data-bind="checked: viewSelectedClausesOnly" /> @Strings.ViewSeletedClausesOnly</label>
+                    </div>
+
+                    <div class="filter_panel_clauses" data-bind="foreach: clauses, visible : !isAdvanced()">
+                        <div class="filter_panel_clause no_select" data-bind="attr: { title: displayName }, click: toggle, css: { checked: checked }, visible: !$parent.viewSelectedClausesOnly() || checked() ">
+                            <div class="filter_panel_clause_text" data-bind="text: shortDisplayName"></div>
+                            @if (ViewBag.HasDeleteSuggestedClausePerm)
+                            {
+                            <img class="filter_panel_clause_delete_img" title="@Strings.Delete" src="/Content/img/delete-clause.svg" data-bind="click: remove" />
+                            }
+                            <img class="filter_panel_clause_right_top_img" src="/Content/img/clausechecked2.svg" />
+                        </div>
+                    </div>
+                    <div data-bind="visible: isAdvanced()">
+                        <textarea id="" class="filter_panel_advanced_textarea" data-bind="textInput: advancedClause, event: { change: advancedClauseChanged }">SELECT * FROM Devices</textarea>
+                        <div class="filter_panel_advanced_example">
+                            <p>Example 1: deviceId ='SampleDevice001_009'</p>
+                            <p>Example 2: tags.Location = 'Redmond' and tags.DeviceType in ['Type1','Type2'] and (properties.reported.version = 'v1.2' or properties.reported.version = 'v1.3')</p>
+                        </div>
+                    </div>
+                    <div data-bind="visible: !isAdvanced()">
+                        <div class="filter_panel_subtitle">@Strings.AddNewClause</div>
+                        <div class="filter_panel_clause_edit">
+                            <div class="filter_panel_clause_edit_row">
+                                <div class="filter_panel_clause_edit_row_column">
+                                    <label class="filter_panel_clause_edit_label filter_group_top" for="filterFieldREPLACE_ME"><span>@Strings.FilterFieldLabel</span></label>
+                                </div>
+                                <div class="filter_panel_clause_edit_row_operator">
+                                    <label class="filter_panel_clause_edit_label" for="filterOperatorREPLACE_ME"><span>@Strings.FilterOperatorLabel</span></label>
+                                </div>
+                                <div class="filter_panel_clause_edit_row_value">
+                                    <label class="filter_panel_clause_edit_label" for="filterValueREPLACE_ME"><span>@Strings.FilterValueLabel</span></label>
+                                </div>
+                                <div class="filter_panel_clause_edit_row_datatype">
+                                    <label class="filter_panel_clause_edit_label" for="filterOperatorREPLACE_ME"><span>@Strings.DataTypeLabel</span></label>
+                                </div>
+                                <div class="filter_panel_clause_edit_row_add"></div>
+                            </div>
+                            <div class="filter_panel_clause_edit_row">
+                                <div class="filter_panel_clause_edit_row_column">
+                                    <input id="txtField" class="filter_panel_text" data-bind="textInput: currentClause().field, event: { blur: newClauseFieldBlur }">
+                                </div>
+                                <div class="filter_panel_clause_edit_row_operator">
+                                    <select class="filter_panel_select" data-bind="value: currentClause().operator">
+                                        <option value="EQ">=</option>
+                                        <option value="NE">!=</option>
+                                        <option value="LT">&lt;</option>
+                                        <option value="GT">&gt;</option>
+                                        <option value="LE">&lt;=</option>
+                                        <option value="GE">&gt;=</option>
+                                        <option value="IN">in</option>
+                                    </select>
+                                </div>
+                                <div class="filter_panel_clause_edit_row_value">
+                                    <input id="txtValue" class="filter_panel_text" data-bind="textInput: currentClause().value, attr: { placeholder: newClauseValuePlaceHolder }, event: { focus: newClauseValueFocus, blur: newClauseValueBlur, keyup: newClauseValueKeyup , change: newClauseValueChange}" />
+                                </div>
+                                <div class="filter_panel_clause_edit_row_datatype">
+                                    <select class="filter_panel_select" data-bind="value: currentClause().dataType, options: twinDataTypeOptions, optionsText: 'text', optionsValue: 'value'"></select>
+                                </div>
+                                <div class="filter_panel_clause_edit_row_add">
+                                    <button type="button" class="button_base" data-bind="click: addClause, enable: canAddClause()">
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="filter_panel_buttons">
+                        <button type="button" class="button_base pull-right" data-bind="click: executeFilter">
+                            @Strings.FilterLabel
+                        </button>
+                        <button type="button" class="button_base filter_panel_button_gray pull-right" data-bind="click: cancelEdit">
+                            @Strings.Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    "use strict";
+
+    var resources = {
+        retry: '@Html.JavaScriptString(Strings.Retry)',
+        serviceUnavailable: '@Html.JavaScriptString(Strings.ServiceUnavailable)',
+        deactivateDevice: '@Html.JavaScriptString(Strings.DisableDevice)',
+        activateDevice: '@Html.JavaScriptString(Strings.EnableDevice)',
+        unableToRetrieveDeviceFromService: '@Html.JavaScriptString(Strings.UnableToRetrieveDeviceFromService)',
+        errorWhileRetrievingKeys: '@Html.JavaScriptString(Strings.ErrorWhileRetrievingKeys)',
+        failedToUpdateDeviceStatus: '@Html.JavaScriptString(Strings.FailedToUpdateDeviceStatus)',
+        disabled: '@Html.JavaScriptString(Strings.Disabled)',
+        pending: '@Html.JavaScriptString(Strings.Pending)',
+        running: '@Html.JavaScriptString(Strings.Running)',
+        failedToRetrieveDevices: '@Html.JavaScriptString(Strings.FailedToRetrieveDevices)',
+        noDeviceSelected: '@Html.JavaScriptString(Strings.NoDeviceSelectedLabel)',
+        deviceList: '@Html.JavaScriptString(Strings.DeviceList)',
+        nextPage: '@Html.JavaScriptString(Strings.Next)',
+        previousPage: '@Html.JavaScriptString(Strings.Previous)',
+        infoFiltered: '@Html.JavaScriptString(Strings.FilterInfo)',
+        editColumns: '@Html.JavaScriptString(Strings.EditColumns)',
+        editColumnsPanelLabel: '@Html.JavaScriptString(Strings.EditColumnsPanelLabel)',
+        scheduleJob: '@Html.JavaScriptString(Strings.ScheduleJob)',
+        deviceDetailsPanelLabel: '@Html.JavaScriptString(Strings.DeviceDetailsPaneLabel)',
+        scheduleJobPanelLabel: '@Html.JavaScriptString(Strings.ScheduleJobPanelLabel)',
+        unableToRetrieveColumnsFromService: '@Html.JavaScriptString(Strings.UnableToRetrieveColumnsFromService)',
+        failedToUpdateColumns: '@Html.JavaScriptString(Strings.FailedToUpdateColumns)',
+        failedToRetrieveColumns: '@Html.JavaScriptString(Strings.FailedToRetrieveColumns)',
+        failedToGetFilter: '@Html.JavaScriptString(Strings.FailedToGetFilter)',
+        failedToSaveFilter: '@Html.JavaScriptString(Strings.FailedToSaveFilter)',
+        failedToGetRecentFilter: '@Html.JavaScriptString(Strings.FailedToGetRecentFilters)',
+        failedToDeleteFilter: '@Html.JavaScriptString(Strings.FailedToDeleteFilter)',
+        failedToGetDefaultFilters: '@Html.JavaScriptString(Strings.FailedToGetDefaultFilters)',
+        filterIsEmpty: '@Html.JavaScriptString(Strings.FilterIsEmpty)',
+        incorrectFilterName: '@Html.JavaScriptString(Strings.IncorrectFilterName)',
+        failedToScheduleJob: '@Html.JavaScriptString(Strings.ScheduleJobError)',
+        filterId: '@Html.JavaScriptString((string)ViewBag.FilterId)',
+        allDevices: '@Html.JavaScriptString(Strings.AllDevices)',
+        deleteFilterConfirmation: '@Html.JavaScriptString(Strings.DeleteFilterConfirmation)',
+        deleteFilterWithJobsConfirmation: '@Html.JavaScriptString(Strings.DeleteFilterWithJobsConfirmation)',
+        clauseMultipleValuesHint: '@Html.JavaScriptString(Strings.ClauseMultipleValuesHint)',
+        clauseSingleValueHint: '@Html.JavaScriptString(Strings.ClauseSingleValueHint)',
+        deviceSelected: '@Html.JavaScriptString(Strings.DeviceSelected)',
+        devicesSelected: '@Html.JavaScriptString(Strings.DevicesSelected)',
+        image: '@Html.JavaScriptString(Strings.Image)',
+        iconTagName: '@Html.JavaScriptString((string)ViewBag.IconTagName)',
+        iconBaseUrl: '@Html.JavaScriptString((string)ViewBag.IconBaseUrl)',
+        loadDefaultConfirmation: '@Html.JavaScriptString(Strings.LoadDefaultConfirmation)',
+        twinDataType: {
+            'string': '@TwinDataType.String',
+            'number': '@TwinDataType.Number',
+            'boolean': '@TwinDataType.Boolean'
+        },
+        twinDataTypeOptions: [
+            { value: '@TwinDataType.String', text: '@Html.JavaScriptString(Strings.StringLabel)' },
+            { value: '@TwinDataType.Number', text: '@Html.JavaScriptString(Strings.NumberLabel)' },
+            { value: '@TwinDataType.Boolean', text: '@Html.JavaScriptString(Strings.BooleanLabel)' }
+        ],
+        defaultFilterName: '@Html.JavaScriptString(Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Infrastructure.Constants.UnnamedFilterName)',
+        deleteClauseConfirmation: '@Html.JavaScriptString(Strings.DeleteClauseConfirmation)',
+        pleaseNameYourFilter: '@Html.JavaScriptString(Strings.PleaseNameYourFilter)',
+        filterNameMustBeUnique: '@Html.JavaScriptString(Strings.FilterNameMustBeUnique)'
+    };
+</script>
+
+<script src="~/Scripts/jquery-datatables-api-extensions.js"></script>
+<script src="~/Scripts/Views/Device/DeviceIndex.js?ver=@Constants.JSVersion"></script>
+<script src="~/Scripts/Views/Device/DeviceDetails.js?ver=@Constants.JSVersion"></script>
+<script src="~/Scripts/Views/Device/DeviceListColumns.js?ver=@Constants.JSVersion"></script>
+<script src="~/Scripts/Views/Device/DeviceFilter.js?ver=@Constants.JSVersion"></script>
+<script src="~/Scripts/Views/Device/CellularActions.js?ver=@Constants.JSVersion"></script>
+<script src="~/Scripts/Views/Device/CellularInformation.js?ver=@Constants.JSVersion"></script>

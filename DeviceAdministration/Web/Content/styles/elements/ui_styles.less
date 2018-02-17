@@ -1,0 +1,76 @@
+﻿/* tooltip */
+
+.ui-widget {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ui-widget-content {
+    border: 0;
+    background: none;
+    background-color: @text-color;
+    color: @text-secondary-color;
+    font-size: 1em;
+}
+
+.ui-tooltip {
+    position: absolute;
+    padding: .5em;
+    z-index:10000;
+}
+
+/* UI Dialog */
+
+.ui-dialog {
+    background: none @background-color;
+    border-radius: 0;
+    margin: 0;
+    padding: 0;
+    z-index: 9999;
+}
+
+.ui-dialog-buttonpane {
+    background: none @background-color;
+}
+
+.ui-dialog-content {
+    color: @text-color;
+}
+
+.ui-widget-header {
+    background: none @widget-header-background-color;
+}
+
+.ui-dialog-title {
+    color: @text-secondary-color;
+}
+
+.ui-state-error {
+    border: 0;
+    background: transparent;
+    color: @text-color;
+}
+
+.ui-widget-overlay {
+    background-color: @dialog-container-background-color;
+}
+
+/* Addressing an issue in jQuery UI's initial visibility
+*/
+#ui-datepicker-div {
+    display: none;
+}
+
+/* UI Auto Complete */
+
+.ui-autocomplete {
+    z-index: 1000;
+    max-height: 200px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background-color: @background-color;
+    color: @text-color;
+    border: 1px solid @menu-border-color;
+}
+li.ui-state-focus {
+    background-color: @menu-item-hover-background-color;
+}

@@ -1,0 +1,121 @@
+﻿@using System.Globalization
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.Common.Helpers
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Infrastructure.Models
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Helpers
+@using GlobalResources
+@model Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Models.EditDevicePropertiesModel
+
+@{
+    ViewBag.Title = @Strings.EditDeviceProperties;
+    Layout = "~/Views/Shared/_LayoutNoNavigation.cshtml";
+}
+
+<header class="header_main">
+
+    <button class="header_main__button_back" type="button" data-bind="click: backButtonClicked"></button>
+    <h2 class="header_main__subhead header_main__subhead--large">@string.Format(Strings.EditTagsFor, Model.DeviceId)</h2>
+</header>
+<div class="content_outer">
+
+    <div class="content_inner">
+        <div id="content">
+            <div id="deviceMetadataForm">
+                @using (Html.BeginForm("EditDeviceProperties", "Device", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(m => m.DeviceId)
+
+                    <fieldset class="edit_form">
+                        <table class="values_editor" id="propertiesTable">
+                            <thead>
+                                <tr class="values_editor__groupheader">
+                                    <th class="edit_form__labelHeader">@Strings.ScheduleChangeTags</th>
+                                    <th class="edit_form__labelHeader">@Strings.ScheduleEditValue</th>
+                                    <th class="edit_form__labelHeader">@Strings.DataTypeLabel</th>
+                                    <th class="edit_form__labelHeader">
+                                        <div class="tooltip_header">
+                                            @Strings.Delete
+                                            <img src="~/Content/img/icon_info_gray.svg" class="details_grid_info tooltip_icon" title="@Strings.EditTagDelete" />
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody data-bind="foreach:{data: properties, afterAdd:makeproplist}">
+                                <tr class="values_editor__group">
+                                    <td>
+                                        <input type="text" class="edit_form__texthalf edit_form__propertiesComboBox"
+                                               data-msg-regex=" "
+                                               data-rule-regex="^tags\.\S+$"
+                                               data-rule-maxtwindepth ="5"
+                                               data-bind="value: key, disable: isUserDefinedType, css:{edit_form__deleted : isDeleted()}, attr:{name: 'tagName' + $index(), id: 'tagName' + $index()}" />
+                                    </td>
+                                    <td>
+                                        <input type="text" class="edit_form__texthalf"
+                                               data-rule-maxbytelength="512"
+                                               data-bind='textInput: value.value,event:{ keyup:$root.updateDataType($data) }, enable:!isDeleted() && key(), css:{edit_form__deleted : isDeleted()}' />
+                                    </td>
+                                    <td>
+                                        <select class="edit_form_select" data-bind="value: dataType,  enable:!isDeleted() && key(), options: $root.twinDataTypeOptions, optionsText: 'text', optionsValue: 'value'"></select>
+                                    </td>
+                                    <td>
+                                        <input type="checkbox"
+                                               value="true"
+                                               data-bind='checked: isDeleted ,enable: key()' />
+                                    </td>
+                                    <td><a class="edit_form__link" data-bind="ifnot:$root.oneItemLeft() || isUserDefinedType(), click:$root.remove"><small class="text_small">@Strings.Clear</small></a></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div style="clear:both"></div>
+                        <a data-bind="click:$root.createEmptyPropertyIfNeeded">
+                            <span class="icon-add"></span>
+                            <div class="edit_form__labelbutton">
+                                @Strings.AddTag
+                            </div>
+                        </a>
+                    </fieldset>
+
+                    <fieldset class="fieldset_button">
+                        <input type="button" class="button_base button_secondary button_cancel" data-bind="click: backButtonClicked" value="@Strings.Cancel" />
+                        <button class="button_base" type="submit">@Strings.SaveChangesToDevice</button>
+                    </fieldset>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    "use strict";
+
+    var resources = {
+        redirectUrl: '@Url.Action("Index", "Device")',
+        failedToUpdateTwin: '@Html.JavaScriptString(Strings.FailedToUpdateTwin)',
+        twinDataType: {
+            'string': '@TwinDataType.String',
+            'number': '@TwinDataType.Number',
+            'boolean': '@TwinDataType.Boolean'
+        },
+        twinDataTypeOptions: [
+            { value: '@TwinDataType.String', text: '@Html.JavaScriptString(Strings.StringLabel)' },
+            { value: '@TwinDataType.Number', text: '@Html.JavaScriptString(Strings.NumberLabel)' },
+            { value: '@TwinDataType.Boolean', text: '@Html.JavaScriptString(Strings.BooleanLabel)' }
+        ]
+    }
+</script>
+<script type="text/javascript" src="~/Scripts/Views/Device/EditTags.js?ver=@Constants.JSVersion"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        jQuery.validator.addMethod("maxbytelength", function (value, element, params) {
+            return this.optional(element) || byteCount(value) <= params
+        }, "");
+        jQuery.validator.addMethod("maxtwindepth", function (value, element, params) {
+            return this.optional(element) || value.match(/\./gi).length <= params
+        }, "");
+        IoTApp.EditTags.init("@Model.DeviceId");
+    });
+
+</script>
+

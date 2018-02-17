@@ -1,0 +1,79 @@
+﻿@using System.Web.Mvc.Html
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Security
+@using GlobalResources
+@model Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Models.LocationPropertiesModel
+
+<div class="header_grid header_grid_general">
+    <h3 class="grid_subheadhead_detail">@Strings.LocationDetails</h3>
+</div>
+<section class="details_grid_general" id="locationDetailsGrid">
+    <h4 class="grid_subhead_detail_label">@Strings.LatitudeHeader</h4>
+    <p class="grid_detail_value" name="locationField_latitude">@Model.Latitude</p>
+
+    <h4 class="grid_subhead_detail_label">@Strings.LongitudeHeader</h4>
+    <p class="grid_detail_value" name="locationField_longitude">@Model.Longitude</p>
+
+    <h4 class="grid_subhead_detail_label">@Strings.AltitudeHeader</h4>
+    <p class="grid_detail_value" name="locationField_altitude">@Model.Altitude</p>
+    @{
+        using (Html.BeginForm("DeleteLocation", "Location", FormMethod.Post, new { @id = "frmDeleteLocation" }))
+        {
+            @Html.HiddenFor(m => m.Latitude)
+            @Html.HiddenFor(m => m.Longitude)
+            @Html.HiddenFor(m => m.Altitude)
+            @Html.HiddenFor(m => m.Status)
+            @Html.HiddenFor(m => m.NoOfDevices)
+            @Html.HiddenFor(m => m.JsonList)
+
+            <div class="grid_rules_details__rule_status_container">
+                <button type="submit" class="button_base rule_status_container___rule_status_button" id="btnDeleteLocation">
+                    @Strings.DeleteLocation
+                </button>
+            </div>
+        }
+    }
+</section>
+
+<div class="header_grid header_grid_general">
+    <h3 class="grid_subheadhead_detail">@Strings.LocationAddress</h3>
+</div>
+<section class="details_grid_general" id="locationAddressGrid">
+    <h4 class="grid_subhead_detail_label">@Strings.Country</h4>
+    <p class="grid_detail_value" name="locationField_country">Country</p>
+
+    <h4 class="grid_subhead_detail_label">@Strings.State</h4>
+    <p class="grid_detail_value" name="locationField_state">State</p>
+
+    <h4 class="grid_subhead_detail_label">@Strings.Address</h4>
+    <p class="grid_detail_value" name="locationField_address">Address</p>
+</section>
+
+<div class="header_grid header_grid_general">
+    <h3 class="grid_subheadhead_detail">@Strings.LocationStatus</h3>
+</div>
+<section class="details_grid_general" id="locationStatusGrid">
+    <h4 class="grid_subhead_detail_label">@Strings.RoadStatus</h4>
+    <p class="grid_detail_value" name="locationField_status">@Model.Status</p>
+
+    <h4 class="grid_subhead_detail_label">@Strings.NoOfJerkedDevicesHeader</h4>
+    <p class="grid_detail_value" name="locationField_noofdevices">@Model.NoOfDevices</p>
+    @{
+        using (Html.BeginForm("LocationReport", "Location", FormMethod.Post, new { @id = "frmReport" }))
+        {
+            @Html.HiddenFor(m => m.Latitude)
+            @Html.HiddenFor(m => m.Longitude)
+            @Html.HiddenFor(m => m.Altitude)
+            @Html.HiddenFor(m => m.Status)
+            @Html.HiddenFor(m => m.NoOfDevices)
+            @Html.HiddenFor(m => m.JsonList)
+
+            <div class="grid_rules_details__rule_status_container">
+                <button type="submit" class="button_base rule_status_container___rule_status_button" id="btnViewReport">
+                    @Strings.ViewReport
+                </button>
+            </div>
+        }
+    }
+    
+    
+</section>

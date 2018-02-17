@@ -1,0 +1,139 @@
+﻿@using GlobalResources
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.Common.Constants
+@using Microsoft.Azure.Devices.Applications.RemoteMonitoring.DeviceAdmin.Web.Helpers
+@model Microsoft.Azure.Devices.Applications.RemoteMonitoring.Common.Models.ApiRegistrationModel
+
+<div class="advanced_left_column">
+    @switch (Model.ApiRegistrationProvider)
+    {
+        case ApiRegistrationProviderTypes.Jasper:
+            {
+                <div class="provider_info_text">@Strings.ApiRegistrationInfoTextJasper</div>
+                break;
+            }
+        case ApiRegistrationProviderTypes.Ericsson:
+            {
+                <div class="provider_info_text">@Strings.ApiRegistrationInfoTextEricsson</div>
+                break;
+            }
+        default:
+            {
+                <a href="@Strings.ApiProviderGenericHelpUrl" target="_blank">Need Help?</a>
+                break;
+            }
+    }
+    <fieldset class="registration_content">
+        <div class="registration_textbox">
+            <h2 class="registration_description">@Strings.ApiProviderLabel</h2>
+            <fieldset class="registration_select">
+                <div class="form-group">
+                    <select class="api_input" id="apiRegistrationProvider">
+                        <option value="">@Strings.ApiRegistrationSelectOptionInitial</option>
+                        <option value="Jasper">@Strings.ApiRegistrationSelectOptionJasper</option>
+                        <option value="Ericsson">@Strings.ApiRegistrationSelectOptionEricsson</option>
+                    </select>
+                    <div class="api_check_field" id="apiRegistrationProviderRequired">
+                        @Strings.RequiredValue
+                    </div>
+                </div>
+            </fieldset>
+            <p id="apiRegistrationProviderWarning" class="api_warning_label">
+                @Strings.ApiProviderWarningLabel
+            </p>
+            <p>
+                <button id="changeApiRegistrationProviderButton" class="button_base registration_change_provder_input" type="button">@Strings.ChangeApiProvider</button>
+            </p>
+            <fieldset>
+                <h2 class="registration_description">@Strings.BaseUrlLabel</h2>
+                @Html.TextBoxFor(model => model.BaseUrl, new { id = "BaseUrl", title = Strings.BaseUrlToolTip, @class = "api_input" })
+                <div class="api_check_field" id="BaseUrlRequired">
+                    @Strings.RequiredValue
+                </div>
+            </fieldset>
+        </div>
+    </fieldset>
+    <fieldset class="registration_content">
+        <div class="registration_textbox">
+            <h2 class="registration_description">@Strings.LicenseKeyLabel</h2>
+            <div>
+                @Html.TextBoxFor(model => model.LicenceKey, new { id = "LicenceKey", title = Strings.LicenseKeyToolTip, @class = "api_input" })
+            </div>
+            <div class="api_check_field" id="LicenceKeyRequired">
+                @Strings.RequiredValue
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="registration_content">
+        <div class="registration_textbox">
+            <h2 class="registration_description">@Strings.UsernameLabel</h2>
+            <div>
+                @Html.TextBoxFor(model => model.Username, new { id = "Username", title = Strings.UsernameToolTip, @class = "api_input" })
+            </div>
+            <div class="api_check_field" id="UsernameRequired">
+                @Strings.RequiredValue
+            </div>
+        </div>
+    </fieldset>
+    <fieldset class="registration_content registration_content_last">
+        <div class="registration_textbox">
+            <h2 class="registration_description">@Strings.PasswordLabel</h2>
+            <div>
+                @Html.PasswordFor(model => model.Password, new { id = "Password", title = Strings.PasswordToolTip, @class = "api_input" })
+            </div>
+            <div class="api_check_field" id="PasswordRequired">
+                @Strings.RequiredValue
+            </div>
+        </div>
+    </fieldset>
+    @Html.HiddenFor(model => model.ApiRegistrationProvider)
+    <fieldset class="fieldset_button">
+        <button id="editButton" class="button_base registration_edit_input" type="button">@Strings.Edit</button>
+        <button id="saveButton" class="button_base registration_save_input" type="button">@Strings.Save</button>
+    </fieldset>
+    <div class="api_save_registration_failed" id="registrationFailed">
+        @Strings.ApiRegistrationFailed
+    </div>
+    <div class="api_save_registration_passed" id="registrationPassed">
+        @Strings.ApiRegistrationSuccessful
+    </div>
+</div>
+
+
+<div class="api_registration_help_link">
+    @switch (Model.ApiRegistrationProvider)
+    {
+        case ApiRegistrationProviderTypes.Jasper:
+            {
+                <a href="@Strings.JasperHelpLink" target="_blank">Need Help?</a>
+                break;
+            }
+        case ApiRegistrationProviderTypes.Ericsson:
+            {
+                <a href="@Strings.EricssonHelpLink" target="_blank">Need Help?</a>
+                break;
+            }
+        default:
+            {
+                <a href="@Strings.ApiProviderGenericHelpUrl" target="_blank">Need Help?</a>
+                break;
+            }
+    }
+</div>
+
+
+
+<script type="text/javascript">
+    $(window).ready(
+        function () {
+            'use strict';
+            var config = {
+                subheadContent: '@Html.JavaScriptString(Strings.ApiRegistrationTitle)',
+                goBackUrl: '@Url.Action("SelectAdvancedProcess")',
+                apiRegistrationProvider: '@Html.JavaScriptString(Model.ApiRegistrationProvider)',
+                apiProviderChangeWarningMessage: '@Html.JavaScriptString(Strings.ApiProviderChangeWarningMessage)'
+            };
+            IoTApp.Advanced.initSubView(config);
+            IoTApp.Advanced.initRegistration(config);
+        }
+    );
+</script>
